@@ -1,15 +1,17 @@
 class Pokemon {
   final int id;
   final String name;
-  final String? types;
+  final List<String> types;
 
   Pokemon({required this.id, required this.name, required this.types});
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
+    List<String> types = json['types'].cast<String>();
+
     return Pokemon(
       id: json['id'],
       name: json['name'],
-      types: json['types'],
+      types: types,
     );
   }
 
