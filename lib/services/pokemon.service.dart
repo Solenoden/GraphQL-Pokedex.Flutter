@@ -1,6 +1,8 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_pokedex_flutter/models/pokemon.model.dart';
 
+import '../models/pokemon-type.model.dart';
+
 class PokemonService {
   final GraphQLClient graphQlClient;
 
@@ -27,5 +29,29 @@ class PokemonService {
     });
 
     return pokemonList;
+  }
+
+  Future<List<PokemonType>> getPokemonTypes() async {
+    var result = await graphQlClient.query(QueryOptions(document: gql(r'''
+      query PokemonTypeGetAll {
+        pokemonTypeGetAll {
+            name
+            weaknesses
+            strengths
+            color
+        }
+      }
+    ''')));
+    var json = result.data!['pokemonTypeGetAll'];
+    if (json.isEmpty) return [];
+
+    List<PokemonType> typeList = [];
+    json.forEach((type) {
+      if (type is Map<String, dynamic>) {
+        typeList.add(PokemonType.fromJson(type));
+      }
+    });
+
+    return typeList;
   }
 }
