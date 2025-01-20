@@ -66,7 +66,8 @@ class _PokemonListPageState extends State<PokemonListPage> {
         return Column(
           children: [
             _buildTypeFilter(),
-            Expanded(
+            selectedTypes.isNotEmpty
+                ? Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ListView.separated(
@@ -75,10 +76,12 @@ class _PokemonListPageState extends State<PokemonListPage> {
                     return PokemonPreviewTileWidget(visiblePokemon[index],
                         allTypes: types);
                   },
-                  separatorBuilder: (context, index) => SizedBox(height: 25),
+                  separatorBuilder: (context, index) =>
+                      SizedBox(height: 25),
                 ),
               ),
-            ),
+            )
+                : Text('Please select one or more Pokemon types.'),
           ],
         );
       },
@@ -86,45 +89,59 @@ class _PokemonListPageState extends State<PokemonListPage> {
   }
 
   Widget _buildTypeFilter() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
+    return ExpansionTile(
+      title: Row(
         children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            children: List.generate(
-              types.length,
-              (index) {
-                var type = types[index];
-                return Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: GestureDetector(
-                    onTap: () => _toggleTypeSelection(type),
-                    child: Container(
-                      width: 75,
-                      padding: EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                          color: type.color,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: selectedTypes.contains(type)
-                                ? Colors.black45
-                                : type.color,
-                            width: 3,
-                          )),
-                      alignment: Alignment.center,
-                      child: Text(type.name),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Divider(
-            color: Colors.grey,
-            thickness: 2,
-          ),
+          Icon(Icons.filter_alt),
+          SizedBox(width: 10),
+          Text('Viewing ${selectedTypes.length} PokeTypes'),
         ],
+      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Column(
+            children: [
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: List.generate(
+                  types.length,
+                      (index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: _buildPokemonTypePill(types[index]),
+                    );
+                  },
+                ),
+              ),
+              Divider(
+                color: Colors.grey,
+                thickness: 2,
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildPokemonTypePill(PokemonType type) {
+    return GestureDetector(
+      onTap: () => _toggleTypeSelection(type),
+      child: Container(
+        width: 75,
+        padding: EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: type.color,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selectedTypes.contains(type)
+                ? Colors.black45
+                : type.color,
+            width: 3,
+          ),),
+        alignment: Alignment.center,
+        child: Text(type.name),
       ),
     );
   }
