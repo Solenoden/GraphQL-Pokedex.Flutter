@@ -14,14 +14,16 @@ class PokemonListPage extends StatefulWidget {
 }
 
 class _PokemonListPageState extends State<PokemonListPage> {
-  List<Pokemon> visiblePokemon = [];
+  late PokemonService pokemonService;
+
+  late Future<List<List<Object?>>> _fetchDataFuture;
   late List<Pokemon> allPokemon;
   late List<PokemonType> types;
 
-  late PokemonService pokemonService;
-  late Future<List<List<Object?>>> _fetchDataFuture;
-
-  final List<PokemonType> selectedTypes = [];
+  List<PokemonType> selectedTypes = [];
+  List<Pokemon> visiblePokemon = [];
+  final List<String> typeCompositionOptions = ['Mono', 'Multi'];
+  List<String> selectedTypeCompositions = ['Mono', 'Multi'];
 
   @override
   void initState() {
@@ -32,14 +34,41 @@ class _PokemonListPageState extends State<PokemonListPage> {
   }
 
   void _toggleTypeSelection(PokemonType type) {
-    setState(() {
-      if (selectedTypes.contains(type)) {
-        selectedTypes.remove(type);
-      } else {
-        selectedTypes.add(type);
-      }
+    if (selectedTypes.contains(type)) {
+      selectedTypes.remove(type);
+    } else {
+      selectedTypes.add(type);
+    }
 
+    _filterPokemon();
+  }
+
+  void _toggleCompositionFilter(String composition) {
+    if (selectedTypeCompositions.contains(composition)) {
+      selectedTypeCompositions.remove(composition);
+    } else {
+      selectedTypeCompositions.add(composition);
+    }
+
+    _filterPokemon();
+  }
+
+  void _filterPokemon() {
+    setState(() {
       visiblePokemon = allPokemon.where((pokemon) {
+        if (selectedTypeCompositions.isEmpty) return false;
+
+        if (selectedTypeCompositions.length != typeCompositionOptions.length) {
+          if (selectedTypeCompositions.contains('Mono') &&
+              pokemon.types.length > 1) {
+            return false;
+          }
+          if (selectedTypeCompositions.contains('Multi') &&
+              pokemon.types.length == 1) {
+            return false;
+          }
+        }
+
         for (var type in pokemon.types) {
           if (selectedTypes.any((x) => x.name == type)) return true;
         }
@@ -68,20 +97,23 @@ class _PokemonListPageState extends State<PokemonListPage> {
             _buildTypeFilter(),
             selectedTypes.isNotEmpty
                 ? Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView.separated(
-                  itemCount: visiblePokemon.length,
-                  itemBuilder: (context, index) {
-                    return PokemonPreviewTileWidget(visiblePokemon[index],
-                        allTypes: types);
-                  },
-                  separatorBuilder: (context, index) =>
-                      SizedBox(height: 25),
-                ),
-              ),
-            )
-                : Text('Please select one or more Pokemon types.'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ListView.separated(
+                        itemCount: visiblePokemon.length,
+                        itemBuilder: (context, index) {
+                          return PokemonPreviewTileWidget(visiblePokemon[index],
+                              allTypes: types);
+                        },
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 25),
+                      ),
+                    ),
+                  )
+                : Text(
+                    'Please select one or more Pokemon types.',
+                    style: TextStyle(fontSize: 22),
+                  ),
           ],
         );
       },
@@ -90,23 +122,29 @@ class _PokemonListPageState extends State<PokemonListPage> {
 
   Widget _buildTypeFilter() {
     return ExpansionTile(
-      title: Row(
-        children: [
-          Icon(Icons.filter_alt),
-          SizedBox(width: 10),
-          Text('Viewing ${selectedTypes.length} PokeTypes'),
-        ],
-      ),
+      leading: Icon(Icons.filter_alt),
+      title: Text('Viewing ${selectedTypes.length} PokeTypes'),
+      subtitle: selectedTypeCompositions.isEmpty
+          ? Text('None')
+          : Text(selectedTypeCompositions.length > 1
+              ? selectedTypeCompositions.join(', ')
+              : '${selectedTypeCompositions[0]} only'),
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
           child: Column(
             children: [
+              Text(
+                'PokeTypes:',
+                textAlign: TextAlign.start,
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 10),
               Wrap(
                 alignment: WrapAlignment.center,
                 children: List.generate(
                   types.length,
-                      (index) {
+                  (index) {
                     return Padding(
                       padding: const EdgeInsets.all(4),
                       child: _buildPokemonTypePill(types[index]),
@@ -114,9 +152,47 @@ class _PokemonListPageState extends State<PokemonListPage> {
                   },
                 ),
               ),
-              Divider(
-                color: Colors.grey,
-                thickness: 2,
+              SizedBox(height: 20),
+              Text('Type Composition:',
+                  textAlign: TextAlign.start, style: TextStyle(fontSize: 16)),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: typeCompositionOptions
+                    .map(
+                      (composition) => Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: GestureDetector(
+                          onTap: () => _toggleCompositionFilter(composition),
+                          child: Container(
+                            width: 75,
+                            padding: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color:
+                                  selectedTypeCompositions.contains(composition)
+                                      ? Colors.black87
+                                      : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.black87,
+                                width: 3,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              composition,
+                              style: TextStyle(
+                                color: selectedTypeCompositions
+                                        .contains(composition)
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           ),
@@ -129,19 +205,24 @@ class _PokemonListPageState extends State<PokemonListPage> {
     return GestureDetector(
       onTap: () => _toggleTypeSelection(type),
       child: Container(
-        width: 75,
+        width: 100,
         padding: EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: type.color,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selectedTypes.contains(type)
-                ? Colors.black45
-                : type.color,
+            color: selectedTypes.contains(type) ? Colors.black45 : type.color,
             width: 3,
-          ),),
+          ),
+        ),
         alignment: Alignment.center,
-        child: Text(type.name),
+        child: Text(
+          type.name.toUpperCase(),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
