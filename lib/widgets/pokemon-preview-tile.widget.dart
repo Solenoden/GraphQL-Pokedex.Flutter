@@ -39,7 +39,18 @@ class PokemonPreviewTileWidget extends StatelessWidget {
             Text(
               pokemon.name,
               style: TextStyle(color: Colors.white, fontSize: 20),
-            )
+            ),
+            Expanded(
+              child: Text(
+                '#${pokemon.id}',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 44,
+                  color: Colors.white.withOpacity(0.4), // Make it semi-transparent
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ),
