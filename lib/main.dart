@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql_pokedex_flutter/cubits/pokemon-type.cubit.dart';
 import 'package:graphql_pokedex_flutter/pages/pokemon-list.page.dart';
 import 'package:graphql_pokedex_flutter/services/pokemon.service.dart';
 import 'package:provider/provider.dart';
+
+import 'cubits/pokemon.cubit.dart';
 
 void main() async {
   var graphQlClient = await initGraphQl();
@@ -13,8 +17,14 @@ void main() async {
         Provider<GraphQLClient>(create: (context) => graphQlClient),
         Provider<PokemonService>(create: (context) => PokemonService(Provider.of<GraphQLClient>(context, listen: false))),
       ],
+    child: MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => PokemonCubit(Provider.of<PokemonService>(context, listen: false))),
+        BlocProvider(create: (context) => PokemonTypeCubit(Provider.of<PokemonService>(context, listen: false))),
+      ],
       child: App()
-    )
+    ),
+  )
   );
 }
 
@@ -33,7 +43,12 @@ class App extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Pokedex: the Original 151'),
+      home: BlocListener<PokemonTypeCubit, PokemonTypeCubitState>(
+          listener: (context, state) {
+            Provider.of<PokemonCubit>(context, listen: false).filterPokemon(state.selectedTypes, state.selectedTypeCompositions);
+          },
+          child: MyHomePage(title: 'Pokedex: the Original 151'),
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -49,6 +64,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<PokemonTypeCubit>(context, listen: false).fetchTypes();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
