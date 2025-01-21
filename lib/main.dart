@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_pokedex_flutter/cubits/pokemon-type.cubit.dart';
 import 'package:graphql_pokedex_flutter/pages/pokemon-list.page.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'cubits/pokemon.cubit.dart';
 
 void main() async {
+  await dotenv.load(fileName: '.env');
   var graphQlClient = await initGraphQl();
 
   runApp(
@@ -100,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
 Future<GraphQLClient> initGraphQl() async {
   await initHiveForFlutter();
   final client = GraphQLClient(
-    link: HttpLink('http://192.168.50.200:3000/graphql'),
+    link: HttpLink('${dotenv.env['API_BASE_URL']}/graphql'),
     cache: GraphQLCache(store: HiveStore()),
   );
   return client;

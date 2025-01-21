@@ -24,6 +24,7 @@ class PokemonTypeCubitState extends AppCubitState {
     );
   }
 
+  @override
   PokemonTypeCubitState clone() {
     return PokemonTypeCubitState(
       allTypes: this.allTypes,
