@@ -156,16 +156,19 @@ class PokemonInfoPage extends StatelessWidget {
                   ),
                 ),
                 ...stage.value.map((pokemonInStage) {
-                  return PokemonPortraitWidget(
-                    pokemonInStage,
-                    type: PortraitType.circleBorder,
-                    width: 64,
-                    height: 64,
-                    onTap: () {
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => PokemonInfoPage(pokemonInStage))
-                      );
-                    },
+                  return Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: PokemonPortraitWidget(
+                      pokemonInStage,
+                      type: PortraitType.circleBorder,
+                      width: 64,
+                      height: 64,
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => PokemonInfoPage(pokemonInStage))
+                        );
+                      },
+                    ),
                   );
                 })
               ],

@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_pokedex_flutter/models/pokemon-type.model.dart';
 import 'package:graphql_pokedex_flutter/pages/pokemon-info.page.dart';
+import 'package:graphql_pokedex_flutter/widgets/pokemon-portrait.dart';
 
 import '../models/pokemon.model.dart';
 
@@ -36,11 +36,7 @@ class PokemonPreviewTileWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              CachedNetworkImage(
-                imageUrl: imageUrl,
-                height: 75,
-                width: 75,
-              ),
+              PokemonPortraitWidget(pokemon, width: 75, height: 75,),
               SizedBox(width: 16),
               Text(
                 pokemon.name,
@@ -63,7 +59,4 @@ class PokemonPreviewTileWidget extends StatelessWidget {
       ),
     );
   }
-
-  String get imageUrl =>
-      'https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${pokemon.id.toString().padLeft(3, '0')}.png';
 }
