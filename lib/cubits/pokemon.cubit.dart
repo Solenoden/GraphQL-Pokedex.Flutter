@@ -80,4 +80,39 @@ class PokemonCubit extends AppCubit<PokemonCubitState> {
 
     emit(state);
   }
+
+  List<List<Pokemon>> getEvolutionTree(Pokemon pokemon) {
+    Pokemon baseStage = getBaseStage(pokemon);
+    List<List<Pokemon>> evolutionTree = [];
+
+    List<Pokemon> currentStage = [baseStage];
+    while (currentStage.isNotEmpty) {
+      evolutionTree.add(currentStage);
+      currentStage = getNextEvolutionStage(currentStage[0]);
+    }
+
+    return evolutionTree;
+  }
+
+  Pokemon getBaseStage(Pokemon pokemon) {
+    Pokemon? baseStage;
+    Pokemon currentPokemon = pokemon;
+
+    while (baseStage == null) {
+      if (currentPokemon.evolvesFromId == null) {
+        baseStage = currentPokemon;
+        break;
+      }
+      currentPokemon = state.allPokemon.firstWhere((x) => x.id == currentPokemon.evolvesFromId);
+    }
+
+    return baseStage;
+  }
+
+  List<Pokemon> getNextEvolutionStage(Pokemon pokemon) {
+    if (pokemon.evolvesToIds == null || pokemon.evolvesToIds!.isEmpty) return [];
+    return pokemon.evolvesToIds!.map(
+      (evolveToId) => state.allPokemon.firstWhere((x) => x.id == evolveToId)
+    ).toList();
+  }
 }

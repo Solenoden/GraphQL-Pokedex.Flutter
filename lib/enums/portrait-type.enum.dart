@@ -1,0 +1,4 @@
+enum PortraitType {
+  imageOnly,
+  circleBorder
+}

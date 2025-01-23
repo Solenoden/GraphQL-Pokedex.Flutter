@@ -13,8 +13,10 @@ class PokemonService {
       query PokemonGetAll {
           pokemonGetAll {
               id
-              name,
+              name
               types
+              evolvesFromId
+              evolvesToIds
           }
       }
     ''')));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_pokedex_flutter/cubits/pokemon-type.cubit.dart';
 import 'package:graphql_pokedex_flutter/cubits/pokemon.cubit.dart';
+import 'package:graphql_pokedex_flutter/widgets/pokemon-type-pill.widget.dart';
 import 'package:provider/provider.dart';
 
 import '../models/pokemon-type.model.dart';
@@ -69,10 +70,10 @@ class PokemonListPage extends StatelessWidget {
                       var type = state.allTypes[index];
                       return Padding(
                         padding: const EdgeInsets.all(4),
-                        child: _buildPokemonTypePill(
+                        child: PokemonTypePill(
                           type,
-                          state.selectedTypes.contains(type),
-                          () => pokemonTypeCubit.toggleFilter(type, null),
+                          isSelected: state.selectedTypes.contains(type),
+                          onTap: () => pokemonTypeCubit.toggleFilter(type, null),
                         ),
                       );
                     },

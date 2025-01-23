@@ -1,6 +1,7 @@
 import 'package:graphql_pokedex_flutter/cubits/app-cubit.abstract.dart';
 
 import '../models/pokemon-type.model.dart';
+import '../models/pokemon.model.dart';
 import '../services/pokemon.service.dart';
 
 class PokemonTypeCubitState extends AppCubitState {
@@ -67,5 +68,27 @@ class PokemonTypeCubit extends AppCubit<PokemonTypeCubitState> {
     }
 
     emit(state);
+  }
+
+  List<PokemonType> getTypesForPokemon(Pokemon pokemon) {
+    return pokemon.types
+        .map((typeName) =>
+            state.allTypes.firstWhere((type) => type.name == typeName))
+        .toList();
+  }
+
+  List<PokemonType> getWeaknessTypesOfPokemon(Pokemon pokemon) {
+    var pokemonTypes = getTypesForPokemon(pokemon);
+    List<String> weaknessNames = [];
+    for (var pokemonType in pokemonTypes) {
+      weaknessNames.addAll(pokemonType.weaknesses);
+    }
+
+    List<PokemonType> weaknesses = [];
+    for (var weaknessName in weaknessNames) {
+      weaknesses.add(state.allTypes.firstWhere((type) => type.name == weaknessName));
+    }
+
+    return weaknesses;
   }
 }
